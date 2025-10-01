@@ -24,30 +24,38 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col items-center p-8">
-      <h1 className="text-3xl font-bold mb-6 text-blue-700">News Verified</h1>
+    <main className="flex flex-col items-center p-24 max-w-6xl mx-auto">
+      <h1 className="text-6xl font-bold mb-24 text-blue-700">News Verified</h1>
 
-      <input
-        type="text"
-        placeholder="Paste news article URL..."
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        className="border p-2 rounded w-96 mb-4"
-      />
+      <div className="w-full space-y-16">
+        <input
+          type="text"
+          placeholder="Paste news article URL..."
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          className="w-full border border-gray-300 rounded-xl px-16 py-8 text-2xl focus:ring-4 focus:ring-blue-500 focus:border-transparent"
+          disabled={loading}
+        />
 
-      <button
-        onClick={handleVerify}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-      >
-        {loading ? "Verifying..." : "Verify News"}
-      </button>
+        <button
+          onClick={handleVerify}
+          disabled={!url.trim() || loading}
+          className="w-full bg-blue-600 text-white px-16 py-8 rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-2xl font-bold"
+        >
+          {loading ? "Verifying..." : "Verify News"}
+        </button>
+      </div>
 
-      {error && <p className="mt-4 text-red-600">{error}</p>}
+      {error && (
+        <div className="w-full mt-16 p-12 bg-red-50 border border-red-200 rounded-xl">
+          <p className="text-red-600 text-xl">{error}</p>
+        </div>
+      )}
 
       {summary && (
-        <div className="mt-6 w-3/4 max-w-2xl bg-gray-100 p-4 rounded shadow">
-          <h2 className="font-semibold mb-2">Summary:</h2>
-          <p>{summary}</p>
+        <div className="w-full mt-24 bg-white p-16 rounded-xl shadow-lg border">
+          <h2 className="font-bold mb-8 text-gray-800 text-3xl">Summary:</h2>
+          <p className="text-gray-700 leading-relaxed text-2xl">{summary}</p>
         </div>
       )}
     </main>
