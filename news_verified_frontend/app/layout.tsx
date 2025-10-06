@@ -1,3 +1,5 @@
+import Providers from './components/Providers'
+
 export const metadata = {
   title: 'News Verified',
   description: 'AI-powered news verification',
@@ -138,7 +140,9 @@ export default function RootLayout({
         `}</style>
       </head>
       <body>
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   )

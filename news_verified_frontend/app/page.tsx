@@ -1,8 +1,11 @@
 "use client";
 import { useState } from "react";
+import { useSession } from 'next-auth/react';
 import axios from "axios";
+import AuthButton from './components/AuthButton';
 
 export default function Home() {
+  const { data: session, status } = useSession();
   const [url, setUrl] = useState("");
   const [summary, setSummary] = useState<string | null>(null);
   const [classification, setClassification] = useState<string | null>(null);
@@ -34,6 +37,20 @@ export default function Home() {
     }
   };
 
+  // Show loading state while checking authentication
+  if (status === "loading") {
+    return (
+      <div style={{ minHeight: '100vh', padding: '20px' }}>
+        <div className="container">
+          <h1 className="header">News Verified</h1>
+          <div style={{ textAlign: 'center', padding: '40px' }}>
+            <p>Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: '100vh', padding: '20px' }}>
       <div className="container">
@@ -41,37 +58,60 @@ export default function Home() {
         {/* Header */}
         <h1 className="header">News Verified</h1>
 
-        {/* Input Section */}
-        <div className="input-section">
-          <label className="label">News Article URL:</label>
-          <input
-            type="text"
-            placeholder="Paste news article URL here..."
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="input"
-            disabled={loading}
-          />
-        </div>
+        {/* Authentication */}
+        <AuthButton />
 
-        {/* Button */}
-        <button
-          onClick={handleVerify}
-          disabled={!url.trim() || loading}
-          className="button"
-        >
-          {loading ? "Processing..." : "Verify & Analyze News"}
-        </button>
+        {/* Only show app content if user is signed in */}
+        {session ? (
+          <>
+            {/* Input Section */}
+            <div className="input-section">
+              <label className="label">News Article URL:</label>
+              <input
+                type="text"
+                placeholder="Paste news article URL here..."
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                className="input"
+                disabled={loading}
+              />
+            </div>
+
+            {/* Button */}
+            <button
+              onClick={handleVerify}
+              disabled={!url.trim() || loading}
+              className="button"
+            >
+              {loading ? "Processing..." : "Verify & Analyze News"}
+            </button>
+          </>
+        ) : (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '40px',
+            backgroundColor: '#f8f9fa',
+            borderRadius: '4px',
+            border: '1px solid #dee2e6'
+          }}>
+            <h2 style={{ color: '#333', marginBottom: '15px' }}>
+              Sign in to use News Verified
+            </h2>
+            <p style={{ color: '#666', marginBottom: '20px' }}>
+              Please sign in with your Google account to analyze news articles for bias and get AI-powered summaries.
+            </p>
+          </div>
+        )}
 
         {/* Error Message */}
-        {error && (
+        {session && error && (
           <div className="error">
             {error}
           </div>
         )}
 
         {/* Summary */}
-        {summary && (
+        {session && summary && (
           <div className="result-card">
             <h2 className="result-title">AI Summary</h2>
             <p className="result-text">
@@ -81,7 +121,7 @@ export default function Home() {
         )}
 
         {/* Classification */}
-        {classification && scores && (
+        {session && classification && scores && (
           <div className="result-card">
             <h2 className="result-title">Bias Analysis</h2>
             
