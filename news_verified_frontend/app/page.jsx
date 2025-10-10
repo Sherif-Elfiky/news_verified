@@ -1,19 +1,41 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from 'next-auth/react';
 import axios from "axios";
-import AuthButton from './components/AuthButton';
+import AuthButton from './components/AuthButton.jsx';
 
 export default function Home() {
   const { data: session, status } = useSession();
   const [url, setUrl] = useState("");
-  const [summary, setSummary] = useState<string | null>(null);
-  const [classification, setClassification] = useState<string | null>(null);
-  const [scores, setScores] = useState<{ [key: string]: number } | null>(null);
+  const [summary, setSummary] = useState(null);
+  const [classification, setClassification] = useState(null);
+  const [scores, setScores] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
+  const [sample, setSample] = useState(null);
 
-  const handleVerify = async () => {
+  const samples = ["https://www.theguardian.com/environment/2025/oct/04/pfas-pollution-data-centers-ai?utm_source=chatgpt.com",
+    "https://www.techradar.com/pro/your-workplace-tech-may-be-affecting-your-health-and-not-in-a-good-way?utm_source=chatgpt.com",
+    "https://www.discoverboating.com/resources/dry-bags-boating",
+    "https://www.cnn.com/world/live-news/israel-hamas-gaza-war-10-08-25"
+  ]
+
+  const handleRandArticle = () => {
+    let current_sample = samples[Math.floor(Math.random() * samples.length)]
+    setSample(current_sample)
+  };
+
+  useEffect(() => {
+    handleRandArticle();
+  }, []);
+
+
+
+
+
+
+  const handleVerify = async (urlToVerify = null) => {
+    const urlToUse = urlToVerify || url;
     setLoading(true);
     setError(null);
     setSummary(null);
@@ -21,7 +43,7 @@ export default function Home() {
     setScores(null);
 
     try {
-      const res = await axios.post("http://127.0.0.1:8000/verify", { url });
+      const res = await axios.post("http://127.0.0.1:8000/verify", { url: urlToUse });
       const summaryText = res.data.summary;
       setSummary(summaryText);
 
@@ -30,7 +52,7 @@ export default function Home() {
       });
       setClassification(classifyRes.data.label);
       setScores(classifyRes.data.scores);
-    } catch (err: any) {
+    } catch (err) {
       setError(err.response?.data?.error || "Something went wrong.");
     } finally {
       setLoading(false);
@@ -54,7 +76,7 @@ export default function Home() {
   return (
     <div style={{ minHeight: '100vh', padding: '20px' }}>
       <div className="container">
-        
+
         {/* Header */}
         <h1 className="header">News Verified</h1>
 
@@ -87,8 +109,8 @@ export default function Home() {
             </button>
           </>
         ) : (
-          <div style={{ 
-            textAlign: 'center', 
+          <div style={{
+            textAlign: 'center',
             padding: '40px',
             backgroundColor: '#f8f9fa',
             borderRadius: '4px',
@@ -124,7 +146,7 @@ export default function Home() {
         {session && classification && scores && (
           <div className="result-card">
             <h2 className="result-title">Bias Analysis</h2>
-            
+
             <div style={{ marginBottom: '15px' }}>
               <strong style={{ color: '#555' }}>Primary Classification: </strong>
               <span className={`classification-badge ${classification}`}>
@@ -145,6 +167,38 @@ export default function Home() {
           </div>
         )}
       </div>
+
+        {/* Quick Test Section */}
+        {session && sample && (
+          <div className="quick-test-section" style={{ 
+            marginTop: '20px', 
+            padding: '15px', 
+            backgroundColor: '#f8f9fa', 
+            borderRadius: '4px', 
+            border: '1px solid #dee2e6',
+            textAlign: 'center'
+          }}>
+            <h3 style={{ marginBottom: '10px', color: '#333' }}>Quick Test</h3>
+            <button 
+              onClick={() => {
+                const newSample = samples[Math.floor(Math.random() * samples.length)];
+                setUrl(newSample);
+                handleVerify(newSample);
+              }}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              Test with random article
+            </button>
+          </div>
+        )}
     </div>
   );
 }

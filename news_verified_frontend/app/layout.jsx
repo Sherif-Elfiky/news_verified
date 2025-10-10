@@ -1,15 +1,11 @@
-import Providers from './components/Providers'
+import Providers from './components/Providers.jsx'
 
 export const metadata = {
   title: 'News Verified',
   description: 'AI-powered news verification',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
